@@ -1,6 +1,13 @@
-"use client"
-import { Button } from "../ui/button";
+"use client";
 
+import { loadStripe } from "@stripe/stripe-js";
+import { useEffect } from "react";
+
+
+import { checkoutCredits } from "@/lib/actions/transaction.action";
+
+import { Button } from "../ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Checkout = ({
     plan,
@@ -13,35 +20,57 @@ const Checkout = ({
     credits: number;
     buyerId: string;
 }) => {
+    const { toast } = useToast();
 
+    useEffect(() => {
+        loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+    }, []);
 
-    const handleCheckout = async () => {
-        try {
-            const transaction = { plan, amount, credits, buyerId };
-
-            const response = await fetch("/api/stripe", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(transaction),
+    useEffect(() => {
+        // Check to see if this is a redirect back from Checkout
+        const query = new URLSearchParams(window.location.search);
+        if (query.get("success")) {
+            toast({
+                title: "Order placed!",
+                description: "You will receive an email confirmation",
+                duration: 5000,
+                className: "success-toast",
             });
-
-            if (!response.ok) throw new Error("Failed to create checkout session");
-
-            const { url } = await response.json();
-            window.location.href = url; // Redirect to Stripe Checkout
-        } catch (error) {
-            console.log(error);
-
         }
+
+        if (query.get("canceled")) {
+            toast({
+                title: "Order canceled!",
+                description: "Continue to shop around and checkout when you're ready",
+                duration: 5000,
+                className: "error-toast",
+            });
+        }
+    }, []);
+
+    const onCheckout = async () => {
+        const transaction = {
+            plan,
+            amount,
+            credits,
+            buyerId,
+        };
+
+        await checkoutCredits(transaction);
     };
 
-
     return (
-        <Button onClick={handleCheckout} className="w-full rounded-full bg-purple-gradient bg-cover">
-            Buy Credit
-        </Button>
+        <form action={onCheckout} method="POST">
+            <section>
+                <Button
+                    type="submit"
+                    role="link"
+                    className="w-full rounded-full bg-purple-gradient bg-cover"
+                >
+                    Buy Credit
+                </Button>
+            </section>
+        </form>
     );
 };
 
