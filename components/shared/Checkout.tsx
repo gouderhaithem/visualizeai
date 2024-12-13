@@ -57,6 +57,8 @@ const Checkout = ({
         };
 
         await checkoutCredits(transaction);
+        console.log("Checkout Transaction:", transaction);
+
     };
 
     return (

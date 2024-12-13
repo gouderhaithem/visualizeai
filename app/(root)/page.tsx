@@ -2,8 +2,22 @@
 import { Collection } from "@/components/shared/Collection"
 import { navLinks } from "@/constants"
 import { getAllImages } from "@/lib/actions/image.actions"
+
 import Image from "next/image"
 import Link from "next/link"
+
+export const metadata = {
+  title: "Visualise AI",
+  description:
+    "Visualise AI is a platform that allows you to create stunning images with ease.",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  verification: {
+    google: "DtqWIbFnRPBv3zl4SGTZUnGONN0d7K_HtEsqWmYFGUs",
+  },
+};
+
 
 const Home = async ({ searchParams }: SearchParamProps) => {
   const page = Number(searchParams?.page) || 1;
@@ -13,6 +27,7 @@ const Home = async ({ searchParams }: SearchParamProps) => {
 
   return (
     <>
+
       <section className="home">
         <h1 className="home-heading">
           Unleash Your Creative Vision with Visualise AI
